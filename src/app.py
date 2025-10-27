@@ -1,3 +1,8 @@
+import os
+from database import Product, Base
+from dotenv import load_dotenv
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 import streamlit as st
 
 
@@ -26,10 +31,24 @@ def add_product():
         url = st.text_input('Product URL (optional)')
         
         if st.form_submit_button('Add product'):
+            session = Session()
+            product = Product(name=name, your_price=price, url=url)
+            session.add(product)
+            session.commit()
+            session.close()
             st.success(f'Added product: {name}')
             return True
     return False
 
+
+# Load env variables
+load_dotenv()
+
+
+# Databse setup
+engine = create_engine(os.getenv('POSTGRES_URL'))
+Base.metadata.create_all(engine)
+Session = sessionmaker(bind=engine)
 
 
 # Run the app
