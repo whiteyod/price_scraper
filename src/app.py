@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import streamlit as st
+import webbrowser
 
 
 # Init function for app layout
@@ -39,6 +40,17 @@ def add_product():
             st.success(f'Added product: {name}')
             return True
     return False
+
+
+# Function to delete products 
+def delete_product(product_id: str):
+    ''' Delete a product and all its competitors '''
+    session = Session()
+    product = session.query(Product).filter_by(id=product_id).first()
+    if product:
+        session.delete(product)
+        session.commit()
+    session.close()
 
 
 # Load env variables
