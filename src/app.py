@@ -22,6 +22,18 @@ def main():
         st.header('Add New Product')
         add_product()
         
+    # Main content
+    session = Session()
+    products = session.query(Product).all()
+    
+    if not products:
+        st.info('No products added yet. Use the sidebar to add your first product.')
+    else:
+        for product in products:
+            with st.container():
+                display_product_detail(product)
+    session.close()
+        
         
 # Function to add new product
 def add_product():
@@ -52,6 +64,38 @@ def delete_product(product_id: str):
         session.commit()
     session.close()
 
+
+# Function to display product
+def display_product_detail(product):
+    ''' Display details for a single product '''
+    st.subheader(product.name)
+    cols = st.columns([1, 2])
+    with cols[0]:
+        st.metric(
+            label='Your Price',
+            value=f'{product.your_price:.2f}',
+        )
+        with cols[1]:
+            col1, col2 = st.columns(2)
+            with col1:
+                if product.url:
+                    st.button(
+                        'Visit product',
+                        key=f'visit_btn_{product.id}',
+                        use_container_width=True,
+                        on_click=lambda: webbrowser.open_new_tab(product.url),
+                    )
+                else:
+                    st.text('No URL provided')
+            with col2:
+                st.button(
+                    '🗑️ Delete',
+                    key=f'delete_btn_{product.id}',
+                    type='primary',
+                    use_container_width=True,
+                    on_click=lambda: delete_product(product.id),
+                )
+    
 
 # Load env variables
 load_dotenv()
