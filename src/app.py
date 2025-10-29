@@ -32,6 +32,7 @@ def main():
         for product in products:
             with st.container():
                 display_product_detail(product)
+                add_competitor_form(product, session)
     session.close()
         
         
@@ -96,6 +97,22 @@ def display_product_detail(product):
                     on_click=lambda: delete_product(product.id),
                 )
     
+    
+# Function to add product's URL
+def add_competitor_form(product, session):
+    ''' Form to add a new competitor '''
+    with st.expander('Add new competitor', expanded=False):
+        with st.form(f'add_competitor_{product.id}'):
+            competitor_url = st.text_input('🔗 Competitor product URL')
+            col1, col2 = st.columns([3, 1])
+            with col2:
+                submit = st.form_submit_button(
+                    'Add competitor',
+                    use_container_width=True
+                )
+            if submit:
+                # TODO: Add competitor to the database
+                st.success('Competitor added successfully!')
 
 # Load env variables
 load_dotenv()
