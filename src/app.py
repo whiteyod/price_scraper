@@ -1,10 +1,14 @@
 import os
-from database import Product, Base
+from database import Product, Base, Competitor
 from dotenv import load_dotenv
+from scraper import scrape_competitor_product
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+import time
 import streamlit as st
 import webbrowser
+
+
 
 
 # Init function for app layout
@@ -111,9 +115,29 @@ def add_competitor_form(product, session):
                     use_container_width=True
                 )
             if submit:
-                # TODO: Add competitor to the database
-                st.success('Competitor added successfully!')
+                # Add competitor to the database
+                try:
+                    with st.spinner('Fetching competitor data...'):
+                        data = scrape_competitor_product(competitor_url)
+                        competitor = Competitor(
+                            product_id=product.id,
+                            url=competitor_url,
+                            name=data['name'],
+                            current_price=data['price'],
+                            image_url=data.get('image_url'),
+                            last_checked=data['last_checked'],
+                        )
+                        session.add(competitor)
+                        session.commit()
+                        st.success('Competitor added successfully!')
 
+                        # Refresh the page
+                        time.sleep(1)
+                        st.rerun()
+                except Exception as e:
+                    st.error(f'❌ Error adding competitor: {str(e)}')
+                    
+                    
 # Load env variables
 load_dotenv()
 

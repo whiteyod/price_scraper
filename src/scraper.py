@@ -1,3 +1,4 @@
+import json
 import warnings
 
 warnings.filterwarnings('ignore')
@@ -6,6 +7,7 @@ from datetime import datetime
 from firecrawl import FirecrawlApp
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
+from typing import Any
 
 
 load_dotenv()
@@ -23,18 +25,21 @@ class CompetitorProduct(BaseModel):
 # Function to perform scrapping process with API
 def scrape_competitor_product(url: str) -> dict:
     ''' Scrape product information from a competitor's webpage '''
-    extracted_data = app.scrape_url(
+    extracted_data = app.scrape(
         url,
-        params={
-            'formats': ['extract'],
-            'extract': {
-                'schema': CompetitorProduct.model_json_schema(),
-            },
-        },
+        formats=[{
+            'type': 'json',
+            'schema': CompetitorProduct.model_json_schema(),
+        }],
     )
+    print('>' * 20)
+    lol = getattr(extracted_data, 'json', None)
+    
+    print(lol)
     # Add timestamp to the extracted data
-    data = extracted_data['extract']
-    data['last_checked'] = datetime.utcnow()
+    data = lol
+    data['last_checked'] = datetime.now()
+    print(data)
     
     return data
     
