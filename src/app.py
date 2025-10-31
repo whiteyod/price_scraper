@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from scraper import scrape_competitor_product
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from urllib.parse import urlparse
 import time
 import streamlit as st
 import webbrowser
@@ -36,6 +37,7 @@ def main():
         for product in products:
             with st.container():
                 display_product_detail(product)
+                display_competitors(product)
                 add_competitor_form(product, session)
     session.close()
         
@@ -137,6 +139,64 @@ def add_competitor_form(product, session):
                 except Exception as e:
                     st.error(f'❌ Error adding competitor: {str(e)}')
                     
+
+# Function to delete competitor
+def delete_competitor(competitor_id: str):
+    ''' Delete a competitor '''
+    session = Session()
+    competitor = session.query(Competitor).filter_by(id=competitor_id).first()
+    if competitor:
+        session.delete(competitor)
+        session.commit()
+    session.close()
+    
+    
+# Function to display competitor details
+def display_competitor_metrics(product, comp):
+    ''' Display competitor price comparison metrics '''
+    st.markdown(f'### # {urlparse(comp.url).netloc}')
+    cols = st.columns([1, 2, 1, 1])
+    # Calculate the price difference
+    diff = ((comp.current_price - product.your_price) / product.your_price) * 100
+    # Set price column with currency symbol
+    with cols[0]:
+        st.metric(
+            label='💰 Competitor price',
+            value=f'zł{comp.current_price:.2f}',
+            delta=f'{diff:+.1f}%',
+            delta_color='normal',
+        )
+    # Last checked time
+    with cols[1]:
+        st.markdown(f'**🕒 Checked:** {comp.last_checked.strftime('%Y-%m-%d %H:%M')}')
+    # Button to visit competitor's webpage
+    with cols[2]:
+        st.button(
+            'Visit product',
+            key=f'visit_btn_{comp.id}',
+            use_container_width=True,
+            on_click=lambda: webbrowser.open_new_tab(comp.url),
+        )   
+    # Button to delete competitor
+    with cols[3]:
+        st.button(
+            '🗑️',
+            key=f'delete_comp_btn_{comp.id}',
+            type='primary',
+            use_container_width=True,
+            on_click=lambda: delete_competitor(comp.id),
+        )
+        
+        
+# Function to display all competitors
+def display_competitors(product):
+    ''' Display all competitors for a product '''
+    if product.competitors:
+        with st.expander('Viev competitors', expanded=False):
+            for comp in product.competitors:
+                display_competitor_metrics(product, comp)
+    else:
+        st.info('No competitors added yet')
                     
 # Load env variables
 load_dotenv()
