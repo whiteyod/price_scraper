@@ -1,4 +1,5 @@
 import json
+import time
 import warnings
 
 warnings.filterwarnings('ignore')
@@ -25,21 +26,29 @@ class CompetitorProduct(BaseModel):
 # Function to perform scrapping process with API
 def scrape_competitor_product(url: str) -> dict:
     ''' Scrape product information from a competitor's webpage '''
-    extracted_data = app.scrape(
-        url,
-        formats=[{
-            'type': 'json',
-            'schema': CompetitorProduct.model_json_schema(),
-        }],
-    )
-    print('>' * 20)
-    lol = getattr(extracted_data, 'json', None)
+    retries = 3
+    while retries > 0:
+        try:
+            extracted_data = app.scrape(
+                url,
+                formats=[{
+                    'type': 'json',
+                    'schema': CompetitorProduct.model_json_schema(),
+                }],
+            )
+            print('>' * 20)
+            lol = getattr(extracted_data, 'json', None)
+            
+            print(lol)
+            # Add timestamp to the extracted data
+            data = lol
+            data['last_checked'] = datetime.now()
+            print(data)
     
-    print(lol)
-    # Add timestamp to the extracted data
-    data = lol
-    data['last_checked'] = datetime.now()
-    print(data)
-    
-    return data
+            return data
+        except Exception as e:
+            retires -=1
+            if retries == 0:
+                raise e
+            time.sleep(5)
     
