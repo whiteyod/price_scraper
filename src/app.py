@@ -154,7 +154,7 @@ def delete_competitor(competitor_id: str):
 # Function to display competitor details
 def display_competitor_metrics(product, comp):
     ''' Display competitor price comparison metrics '''
-    st.markdown(f'### # {urlparse(comp.url).netloc}')
+    st.markdown(f'### {urlparse(comp.url).netloc}')
     cols = st.columns([1, 2, 1, 1])
     # Calculate the price difference
     diff = ((comp.current_price - product.your_price) / product.your_price) * 100
@@ -185,6 +185,7 @@ def display_competitor_metrics(product, comp):
             type='primary',
             use_container_width=True,
             on_click=lambda: delete_competitor(comp.id),
+            help='Delete competitor'
         )
         
         
