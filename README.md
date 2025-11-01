@@ -15,3 +15,14 @@ A lightweight **price scraper** that extracts product prices from competitor web
 - **Price comparison engine** – Compare competitor prices side-by-side with yours
 
 ---
+
+
+## Legal & Ethical Use
+
+> **Warning**: Use this tool **only for legitimate competitive research**.  
+> Always respect:
+> - Website `robots.txt`
+> - Terms of Service
+> - Applicable laws (e.g., CFAA, GDPR)
+
+**You are responsible for how you use this tool.** The author is not liable for misuse.
